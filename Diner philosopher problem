@@ -1,0 +1,80 @@
+Airport Runway Management System (Based on dining philosophers problem) - An
+international airport has a limited number of runways (e.g., five runways). Multiple
+airplanes are arriving and departing. Each plane needs access to the control tower's
+clearance and one of the available runways. Planes must wait for their turn, request
+clearance, and then attempt to access a runway to land or take off. Runway allocation
+must be handled carefully to avoid all planes waiting for runways and never landing,
+some planes never landing/taking off, or crashes (runway accessed by more than one
+plane simultaneously). Write a Java program simulating an airport runway
+management system where 10 airplanes are trying to land or take off. Use logging to
+print when a plane requests a runway, gets permission, uses it, and releases it
+// Online Java Compiler
+class Aeroplane extends Thread {
+
+    public ClearanceTower sanka;
+
+    public Aeroplane(ClearanceTower sanka) {
+        this.sanka = sanka;
+    }
+
+    public void run() {
+        String pathway = sanka.allocatePathway();
+        land(sanka.clearanceTower, pathway);
+    }
+
+    public  synchronized void land(Object clearanceTower, String pathway) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+
+        }
+        sanka.freePathway(pathway);
+        
+}
+
+}
+
+class ClearanceTower {
+
+    public Object clearanceTower = new Object();
+
+    boolean[] pathway = new boolean[5];
+
+    String[] pathwayNames = {"A1", "A2", "A3", "A4", "A5"};
+
+    public synchronized String allocatePathway() {
+
+        for (int i = 0; i < pathway.length; i++) {
+
+            if (pathway[i] == false) {
+                pathway[i] = true;
+                return pathwayNames[i];
+            }
+        }
+
+        return null;
+    }
+
+    public synchronized void freePathway(String pathwayName) {
+
+        for (int i = 0; i < pathwayNames.length; i++) {
+
+            if (pathwayNames[i].equals(pathwayName)) {
+                pathway[i] = false;
+            }
+        }
+        notifyAll();
+    }
+}
+public class Main {
+
+    public static void main(String[] args) {
+
+        ClearanceTower sanka = new ClearanceTower();
+
+        for (int i = 0; i < 10; i++) {
+            Aeroplane a = new Aeroplane(sanka);
+            a.start();
+        }
+    }
+}
